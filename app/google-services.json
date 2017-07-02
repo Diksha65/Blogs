@@ -1,0 +1,99 @@
+{
+  "project_info": {
+    "project_number": "362612877355",
+    "firebase_url": "https://friendlychat-9d5be.firebaseio.com",
+    "project_id": "friendlychat-9d5be",
+    "storage_bucket": "friendlychat-9d5be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362612877355:android:64e58dacc0483faa",
+        "android_client_info": {
+          "package_name": "com.google.firebase.udacity.friendlychat"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362612877355-7u058uuuva5kovog3mm4rtiutre19dcs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.google.firebase.udacity.friendlychat",
+            "certificate_hash": "a9580dd9692d0bae937776389a72e6c1df5cd756"
+          }
+        },
+        {
+          "client_id": "362612877355-cfgtefr4uhlpgeq655ldr4hk5oer2bvn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmG859szmwQmgVMItAmf0AlKYUa6Jtj6o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362612877355-cfgtefr4uhlpgeq655ldr4hk5oer2bvn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:362612877355:android:30f0d758d0d075c2",
+        "android_client_info": {
+          "package_name": "com.example.diksha.blogs"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "362612877355-ejl8i5b2pj5j1ltvkamodhokrk8irbp5.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.diksha.blogs",
+            "certificate_hash": "f0e735e8ed9f6bf6db674a64e40fa853b8d1a9ea"
+          }
+        },
+        {
+          "client_id": "362612877355-cfgtefr4uhlpgeq655ldr4hk5oer2bvn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmG859szmwQmgVMItAmf0AlKYUa6Jtj6o"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "362612877355-cfgtefr4uhlpgeq655ldr4hk5oer2bvn.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

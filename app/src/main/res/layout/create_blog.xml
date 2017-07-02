@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:fresco="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Title: "
+            android:id="@+id/text1"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:paddingLeft="10dp"
+            android:hint="The beautiful Sky"
+            android:id="@+id/blog_name"
+            android:layout_alignBaseline="@+id/text1"
+            android:layout_alignBottom="@+id/text1"
+            android:layout_alignStart="@+id/blog_attach"
+            android:background="@null"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/text2"
+            android:text="Description: "
+            android:layout_below="@id/blog_name"/>
+
+        <EditText
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/text2"
+            android:hint="Write the descripiton about your photo here."
+            android:id="@+id/blog_description"
+            android:background="@null"/>
+
+        <ImageView
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/blog_camera"
+            android:layout_margin="10dp"
+            android:clickable="true"
+            android:layout_below="@id/blog_description"
+            android:src="@drawable/ic_camera"/>
+
+        <ImageView
+            android:clickable="true"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:id="@+id/blog_attach"
+            android:layout_below="@id/blog_description"
+            android:layout_toRightOf="@id/blog_camera"
+            android:layout_margin="10dp"
+            android:src="@drawable/ic_attach"/>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:id="@+id/blog_imageview"
+            android:layout_below="@id/blog_camera"
+            fresco:placeholder="@drawable/index" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/blog_create"
+            android:text="create"
+            android:layout_marginEnd="34dp"
+            android:layout_alignBaseline="@+id/cancel_blog"
+            android:layout_alignBottom="@+id/cancel_blog"
+            android:layout_alignEnd="@+id/blog_description" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/cancel_blog"
+            android:text="Cancel"
+            android:layout_marginTop="16dp"
+            android:layout_below="@+id/blog_imageview"
+            android:layout_toEndOf="@+id/blog_camera" />
+    </RelativeLayout>
+</ScrollView>

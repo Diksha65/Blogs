@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Blogs</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="description">Desciption. Hello guys, welcome to Firebase Storage Tutorial for Android. In this tutorial we are going to learn how you can upload images to firebase storage. Infact not only images you can use this firebase storage android tutorial to upload any kind of file to firebase storage. So lets start our Firebase Storage Tutorial.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
