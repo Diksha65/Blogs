@@ -1,51 +1,43 @@
 package com.example.diksha.blogs;
 
-import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
  * Created by diksha on 28/6/17.
  */
-public class CreateBlogFragment extends Fragment {
+public class CreateBlogFragment extends PermissionFragment {
 
-    private static final int PICK_IMAGE_REQUEST = 123;
-    private static final int CLICK_IMAGE_REQUEST = 234;
-    private static final int STORAGE_REQUEST_CODE = 456;
-    private static final int CAMERA_REQUEST_CODE = 567;
+    protected static final int REQUEST_PERMISSIONS     = 0;
+    private static final int PICK_IMAGE_REQUEST      = 1;
+    private static final int CLICK_IMAGE_REQUEST     = 2;
+
+    private static final int STORAGE_REQUEST_CODE    = 3;
+    private static final int CAMERA_REQUEST_CODE     = 4;
 
     private static final String TAG = "CreateBlogFragment";
     private String name, describe;
@@ -109,18 +101,10 @@ public class CreateBlogFragment extends Fragment {
         view.findViewById(R.id.blog_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
-                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
-                else{
-                    if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
-                    else {
-                        currentImageUri = getImageFileUri();
-                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                        intent.putExtra(MediaStore.EXTRA_OUTPUT, currentImageUri);
-                        startActivityForResult(intent, CLICK_IMAGE_REQUEST);
-                    }
-                }
+                if(checkPermissions(getActivity())){
+                    onPermissionGranted();
+                } else
+                    requestPermissions(getActivity(), REQUEST_PERMISSIONS);
             }
         });
 
@@ -139,9 +123,9 @@ public class CreateBlogFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if(path != null && title != null) {
-                    updating(path);
+                    addPhotoToStorage(path);
                 } else if(currentImageUri != null && title != null){
-                    updating(currentImageUri);
+                    addPhotoToStorage(currentImageUri);
                 } else {
                     notifyUser(v, "Data missing. Re-check data.");
                 }
@@ -168,28 +152,69 @@ public class CreateBlogFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == Activity.RESULT_OK){
-            Log.e(TAG, String.valueOf(requestCode));
-            if(requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null){
-                path = data.getData();
-                try{
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), path);
-                    simpleDraweeView.setImageBitmap(bitmap);
-                } catch (IOException ioe){
-                    ioe.printStackTrace();
-                }
-            } else if(requestCode == CLICK_IMAGE_REQUEST){
-                try{
-                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), currentImageUri);
-                    simpleDraweeView.setImageBitmap(bitmap);
-                } catch (IOException ioe){
-                    ioe.printStackTrace();
-                }
+            switch (requestCode){
+                case PICK_IMAGE_REQUEST:
+                    path = data.getData();
+                    simpleDraweeView.setImageURI(path);
+                    break;
+                case CLICK_IMAGE_REQUEST:
+                    simpleDraweeView.setImageURI(currentImageUri);
+                    break;
             }
         }
     }
 
     private Uri getImageFileUri(){
-        File imagePath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyProject");
+        File imagePath = new File(Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyProject");
+        if (! imagePath.exists()){
+            if (! imagePath.mkdirs()){
+                return null;
+            }else{
+                //create new folder
+            }
+        }
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        image = new File(imagePath,"MyProject_"+ timeStamp + ".jpg");
+        return FileProvider.getUriForFile(context, getActivity().getApplicationContext().getPackageName() + ".provider", image);
+    }
+
+    protected void onPermissionGranted(){
+        currentImageUri = getImageFileUri();
+        Intent intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, currentImageUri); // set the image file name
+        startActivityForResult(intentPicture, CLICK_IMAGE_REQUEST);
+    }
+
+    private void addToDatabase(Uri uri){
+        blog = new Blog(name, uri.toString(), describe, "Diksha", "false");
+        String key = dataStash.database.child("DikshaId").push().getKey();
+        blog.setKey(key);
+        dataStash.database.child("DikshaId").child(key).setValue(blog);
+        dataStash.database.child("UnapprovedBlogs").child("DikshaId").child(key).setValue(blog);
+    }
+
+    private void addPhotoToStorage(Uri path){
+        StorageReference sr = dataStash.storage.child(path.getLastPathSegment());
+        sr.putFile(path)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        addToDatabase(taskSnapshot.getDownloadUrl());
+                    }
+                });
+        FragmentManager fragmentManager = getFragmentManager();
+        fragmentManager.popBackStack();
+    }
+
+}
+
+
+ /*
+
+  private Uri getImageFileUri(){
+        File imagePath = new File(Environment
+                .getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), "MyProject");
         if (! imagePath.exists()){
             if (! imagePath.mkdirs()){
                 return null;
@@ -214,6 +239,30 @@ public class CreateBlogFragment extends Fragment {
         //Uri photoURI = FileProvider.getUriForFile(context, context.getApplicationContext().getPackageName() + ".my.package.name.provider", createImageFile());
         return FileProvider.getUriForFile(context, getActivity().getApplicationContext().getPackageName() + ".provider", image);
     }
+
+ @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == Activity.RESULT_OK){
+            if(requestCode == PICK_IMAGE_REQUEST && data != null && data.getData() != null){
+                path = data.getData();
+                try{
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), path);
+                    simpleDraweeView.setImageBitmap(bitmap);
+                } catch (IOException ioe){
+                    ioe.printStackTrace();
+                }
+            } else if(requestCode == CLICK_IMAGE_REQUEST){
+                try{
+                    Bitmap bitmap = MediaStore.Images.Media.getBitmap(getActivity().getContentResolver(), currentImageUri);
+                    simpleDraweeView.setImageBitmap(bitmap);
+                } catch (IOException ioe){
+                    ioe.printStackTrace();
+                }
+            }
+        }
+    }
+
 
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
@@ -255,41 +304,26 @@ public class CreateBlogFragment extends Fragment {
         }
     }
 
-    private void addToDatabase(Uri uri){
-        blog = new Blog(name, uri.toString(), describe, "Diksha", "false");
-        String key = dataStash.database.child("DikshaId").push().getKey();
-        blog.setKey(key);
-        dataStash.database.child("DikshaId").child(key).setValue(blog);
-        dataStash.database.child("UnapprovedBlogs").child("DikshaId")
-                .child(key).setValue(blog, new DatabaseReference.CompletionListener() {
+
+        view.findViewById(R.id.blog_camera).setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                if (databaseError != null) {
-                    Log.e(TAG, "Error occured");
-                } else {
-                    Log.e(TAG, "No error occured");
+            public void onClick(View v) {
+
+                if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
+                    ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.CAMERA}, CAMERA_REQUEST_CODE);
+                else{
+                    if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
+                        ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, STORAGE_REQUEST_CODE);
+                    else {
+                        currentImageUri = getImageFileUri();
+                        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                        intent.putExtra(MediaStore.EXTRA_OUTPUT, currentImageUri);
+                        startActivityForResult(intent, CLICK_IMAGE_REQUEST);
+                    }
                 }
             }
         });
-    }
 
-    private void updating(Uri path){
-        StorageReference sr = dataStash.storage.child(path.getLastPathSegment());
-        sr.putFile(path)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        addToDatabase(taskSnapshot.getDownloadUrl());
-                    }
-                });
-        FragmentManager fragmentManager = getFragmentManager();
-        fragmentManager.popBackStack();
-    }
-
-}
-
-
- /*
     void setReducedImageSize() {
         int targetImageViewWidth = simpleDraweeView.getWidth();
         int targetImageViewHeight = simpleDraweeView.getHeight();

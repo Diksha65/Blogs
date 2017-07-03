@@ -60,7 +60,7 @@
             android:layout_margin="10dp"
             android:src="@drawable/ic_attach"/>
 
-        <ImageView
+        <com.facebook.drawee.view.SimpleDraweeView
             android:layout_width="match_parent"
             android:layout_height="500dp"
             android:id="@+id/blog_imageview"
