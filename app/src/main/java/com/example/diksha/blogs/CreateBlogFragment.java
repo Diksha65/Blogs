@@ -22,7 +22,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -30,8 +29,6 @@ import android.widget.Toast;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -49,16 +46,14 @@ public class CreateBlogFragment extends Fragment {
     private static final int CLICK_IMAGE_REQUEST = 234;
     private static final int STORAGE_REQUEST_CODE = 456;
     private static final int CAMERA_REQUEST_CODE = 567;
+
     private static final String TAG = "CreateBlogFragment";
     private String name, describe;
     private Blog blog;
-    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-    private StorageReference storageReference = FirebaseStorage.getInstance().getReference("Photos");
+    private DataStash dataStash = DataStash.DATA_STASH;
 
     private EditText title, description;
-    private ImageView camera, attach;
     private ImageView simpleDraweeView;
-    private Button createBlog, cancelBlog;
     private Uri path = null;
     private Uri currentImageUri = null;
     private File image;
@@ -76,11 +71,7 @@ public class CreateBlogFragment extends Fragment {
 
         title = (EditText) view.findViewById(R.id.blog_name);
         description = (EditText) view.findViewById(R.id.blog_description);
-        camera = (ImageView) view.findViewById(R.id.blog_camera);
-        attach = (ImageView) view.findViewById(R.id.blog_attach);
         simpleDraweeView = (ImageView) view.findViewById(R.id.blog_imageview);
-        createBlog = (Button) view.findViewById(R.id.blog_create);
-        cancelBlog = (Button)view.findViewById(R.id.cancel_blog);
 
         title.addTextChangedListener(new TextWatcher() {
             @Override
@@ -115,7 +106,7 @@ public class CreateBlogFragment extends Fragment {
             }
         });
 
-        camera.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.blog_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(ActivityCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED)
@@ -134,7 +125,7 @@ public class CreateBlogFragment extends Fragment {
         });
 
 
-        attach.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.blog_attach).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -144,31 +135,33 @@ public class CreateBlogFragment extends Fragment {
             }
         });
 
-        createBlog.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.blog_create).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if(path != null && title != null) {
                     updating(path);
                 } else if(currentImageUri != null && title != null){
                     updating(currentImageUri);
-                }
-                else {
-                    //Toast.makeText(getContext(), "Data missing. Add all the data before creating a new blog. If you don not want to create a new blog then click on the cancel button.", Toast.LENGTH_SHORT).show();
-                    Snackbar.make(v,"Data missing. Re-check data." , Snackbar.LENGTH_SHORT).show();
+                } else {
+                    notifyUser(v, "Data missing. Re-check data.");
                 }
             }
         });
 
-        cancelBlog.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.cancel_blog).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(getActivity(), "Cancelled", Toast.LENGTH_SHORT).show();
+                notifyUser(v, "Cancelled");
                 FragmentManager fragmentManager = getFragmentManager();
                 fragmentManager.popBackStack();
             }
         });
 
         return view;
+    }
+
+    private void notifyUser(View view, String message){
+        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override
@@ -264,10 +257,10 @@ public class CreateBlogFragment extends Fragment {
 
     private void addToDatabase(Uri uri){
         blog = new Blog(name, uri.toString(), describe, "Diksha", "false");
-        String key = databaseReference.child("Blogs").child("DikshaId").push().getKey();
+        String key = dataStash.database.child("DikshaId").push().getKey();
         blog.setKey(key);
-        databaseReference.child("Blogs").child("DikshaId").child(key).setValue(blog);
-        databaseReference.child("Blogs").child("UnapprovedBlogs").child("DikshaId")
+        dataStash.database.child("DikshaId").child(key).setValue(blog);
+        dataStash.database.child("UnapprovedBlogs").child("DikshaId")
                 .child(key).setValue(blog, new DatabaseReference.CompletionListener() {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
@@ -281,7 +274,7 @@ public class CreateBlogFragment extends Fragment {
     }
 
     private void updating(Uri path){
-        StorageReference sr = storageReference.child(path.getLastPathSegment());
+        StorageReference sr = dataStash.storage.child(path.getLastPathSegment());
         sr.putFile(path)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
