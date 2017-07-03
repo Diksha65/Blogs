@@ -55,7 +55,7 @@ public class DataStash {
      *      Creating Fragments
      */
 
-    public void beginFragment(Fragment fragment, int containerId, FragmentManager fragmentManager){
+    public void createFragment(Fragment fragment, int containerId, FragmentManager fragmentManager){
         FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
         fragmentTransaction.replace(containerId, fragment)
                 .addToBackStack(null)

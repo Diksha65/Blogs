@@ -8,10 +8,4 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
 
-    <!-- These aare used
-    -->
-    <string name="empty_members_recyclerview">You havent created any blog. Create your first blog.</string>
-    <string name="empty_public_recyclerview">There are no blogs.</string>
-    <string name="empty_admin_recyclerview">No unapproved blogs.</string>
-
 </resources>
