@@ -4,7 +4,6 @@ package com.example.diksha.blogs;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,10 +36,10 @@ public class AdminBlogFragment extends Fragment {
             public void onClick(View v) {
                 Fragment fragment = DetailFragment.newInstance();
                 FragmentManager fragmentManager = getFragmentManager();
-                FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-                fragmentTransaction.replace(R.id.fragment_containcer, fragment);
-                fragmentTransaction.addToBackStack(null);
-                fragmentTransaction.commit();
+                fragmentManager.beginTransaction()
+                        .replace(R.id.fragment_containcer, fragment)
+                        .addToBackStack(null)
+                        .commit();
             }
         });
         return view;
