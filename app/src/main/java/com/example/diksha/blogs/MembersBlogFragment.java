@@ -29,9 +29,8 @@ public class MembersBlogFragment extends Fragment {
     private static final String LISTENER = "ChildEventListener";
 
     private static DataStash dataStash = DataStash.getDataStash();
-    private FragmentRecyclerviewBinding binding;
-    private RecyclerViewModel recyclerViewModel;
     private BlogsAdapter adapter;
+    private FragmentRecyclerviewBinding binding;
     private ChildEventListener childEventListener = null;
 
     public static MembersBlogFragment newInstance() {
@@ -43,9 +42,8 @@ public class MembersBlogFragment extends Fragment {
                              Bundle savedInstanceState) {
         binding = DataBindingUtil
                 .inflate(inflater, R.layout.fragment_recyclerview, container, false);
-        recyclerViewModel = new RecyclerViewModel();
-        binding.setViewModel(recyclerViewModel);
-        recyclerViewModel.setMember(true);
+        binding.setViewModel(new RecyclerViewModel());
+        binding.getViewModel().setMember(true);
 
         binding.recyclerView.setHasFixedSize(true);
         binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -53,7 +51,13 @@ public class MembersBlogFragment extends Fragment {
         binding.recyclerView.setAdapter(adapter);
 
         updateList();
+        createNewBlog();
+        checkIfEmpty();
 
+        return binding.getRoot();
+    }
+
+    private void createNewBlog(){
         binding.add.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -62,10 +66,6 @@ public class MembersBlogFragment extends Fragment {
                 dataStash.createFragment(fragment, R.id.fragment_containcer, fragmentManager);
             }
         });
-
-
-        checkIfEmpty();
-        return binding.getRoot();
     }
 
     public void updateList(){
@@ -167,8 +167,8 @@ public class MembersBlogFragment extends Fragment {
     }
 
     private void checkIfEmpty(){
-        recyclerViewModel.setEmptyTextVisible(dataStash.membersBlogList.isEmpty());
-        recyclerViewModel.setText("You havent created any blog. Create your first blog.");
+        binding.getViewModel().setEmptyTextVisible(dataStash.membersBlogList.isEmpty());
+        binding.getViewModel().setText("You havent created any blog. Create your first blog.");
     }
 
     @Override
@@ -177,11 +177,6 @@ public class MembersBlogFragment extends Fragment {
         if(childEventListener != null)
             dataStash.detachChildEventListener(LISTENER);
         dataStash.membersBlogList.clear();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 }
 /*
