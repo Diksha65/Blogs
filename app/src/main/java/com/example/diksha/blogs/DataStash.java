@@ -21,7 +21,8 @@ import java.util.concurrent.ConcurrentHashMap;
  * Created by diksha on 3/7/17.
  */
 
-public class DataStash {
+public enum DataStash {
+    DATA_STASH;
 
     DatabaseReference database;
     StorageReference storage;
@@ -30,15 +31,7 @@ public class DataStash {
     List<Blog> membersBlogList;
     List<Blog> adminBlogList;
 
-    private static DataStash sDataStash;
-
-    static DataStash getDataStash(){
-        if(sDataStash == null)
-            sDataStash = new DataStash();
-        return sDataStash;
-    }
-
-    private DataStash(){
+    DataStash(){
         database = FirebaseDatabase.getInstance().getReference("Blogs");
         storage = FirebaseStorage.getInstance().getReference("Photos");
 

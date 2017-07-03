@@ -15,7 +15,7 @@ public abstract class PermissionFragment extends Fragment{
 
     protected abstract void onPermissionGranted();
 
-    private static DataStash dataStash = DataStash.getDataStash();
+    private static DataStash dataStash = DataStash.DATA_STASH;
 
     private static final String[] requiredPermissions = new String[]{
             Manifest.permission.INTERNET,

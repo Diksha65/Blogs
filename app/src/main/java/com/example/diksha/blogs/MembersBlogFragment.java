@@ -1,6 +1,5 @@
 package com.example.diksha.blogs;
 
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -10,9 +9,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.TextView;
 
-import com.example.diksha.blogs.databinding.BlogItemBinding;
-import com.example.diksha.blogs.databinding.FragmentRecyclerviewBinding;
+import com.facebook.drawee.view.SimpleDraweeView;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -28,9 +28,11 @@ public class MembersBlogFragment extends Fragment {
     private static final String TAG = "MembersBlogFragment";
     private static final String LISTENER = "ChildEventListener";
 
-    private static DataStash dataStash = DataStash.getDataStash();
+    private static DataStash dataStash = DataStash.DATA_STASH;
     private BlogsAdapter adapter;
-    private FragmentRecyclerviewBinding binding;
+    private RecyclerView recyclerView;
+    private TextView emptyText;
+    private View view;
     private ChildEventListener childEventListener = null;
 
     public static MembersBlogFragment newInstance() {
@@ -40,25 +42,27 @@ public class MembersBlogFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        binding = DataBindingUtil
-                .inflate(inflater, R.layout.fragment_recyclerview, container, false);
-        binding.setViewModel(new RecyclerViewModel());
-        binding.getViewModel().setMember(true);
+        view = inflater.inflate(R.layout.fragment_recyclerview, container, false);
 
-        binding.recyclerView.setHasFixedSize(true);
-        binding.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        emptyText = (TextView)view.findViewById(R.id.emptyView);
+
+        recyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
+        recyclerView.setHasFixedSize(true);
+        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+
         adapter = new BlogsAdapter(dataStash.membersBlogList);
-        binding.recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(adapter);
 
         updateList();
         createNewBlog();
         checkIfEmpty();
 
-        return binding.getRoot();
+        return view;
     }
 
     private void createNewBlog(){
-        binding.add.setOnClickListener(new View.OnClickListener() {
+        view.findViewById(R.id.add).setVisibility(View.VISIBLE);
+        view.findViewById(R.id.add).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Fragment fragment = CreateBlogFragment.newInstance();
@@ -123,23 +127,23 @@ public class MembersBlogFragment extends Fragment {
     }
 
     private class BlogsHolder extends RecyclerView.ViewHolder{
-        private BlogItemBinding blogItemBinding;
+        SimpleDraweeView imageView;
+        TextView title;
+        TextView blogger;
+        Button approval;
 
-        public BlogsHolder(BlogItemBinding binding){
-            super(binding.getRoot());
-            blogItemBinding = binding;
-            blogItemBinding.setItemModel(new BlogItemModel());
-        }
-
-        public void bind(Blog blog){
-            blogItemBinding.getItemModel().setBlog(blog);
-            blogItemBinding.getItemModel().setPublicBlog(false);
-            blogItemBinding.executePendingBindings();
+        public BlogsHolder(View itemView){
+            super(itemView);
+            imageView = (SimpleDraweeView) itemView.findViewById(R.id.blog_image);
+            title = (TextView)itemView.findViewById(R.id.blog_title);
+            blogger = (TextView)itemView.findViewById(R.id.blog_name);
+            approval = (Button)itemView.findViewById(R.id.blog_approve);
         }
 
     }
 
     public class BlogsAdapter extends RecyclerView.Adapter<BlogsHolder>{
+
         List<Blog> blogList;
 
         public BlogsAdapter(List<Blog> blogs){
@@ -148,16 +152,17 @@ public class MembersBlogFragment extends Fragment {
 
         @Override
         public BlogsHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            LayoutInflater layoutInflater = LayoutInflater.from(getActivity());
-            BlogItemBinding binding = DataBindingUtil
-                    .inflate(layoutInflater, R.layout.blog_item, viewGroup, false);
-            return new BlogsHolder(binding);
+            View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.blog_item, viewGroup, false);
+            return new BlogsHolder(view);
         }
 
         @Override
         public void onBindViewHolder(BlogsHolder blogsHolder, int i) {
-            Blog blog = dataStash.membersBlogList.get(i);
-            blogsHolder.bind(blog);
+            Blog blog = blogList.get(i);
+            blogsHolder.blogger.setText(blog.getBloggerName());
+            blogsHolder.imageView.setImageURI(blog.getPhotoUrl());
+            blogsHolder.title.setText(blog.getTitle());
+            blogsHolder.approval.setText(blog.getApproved().equals("true") ? "Approved" : "Not Approved");
         }
 
         @Override
@@ -167,8 +172,14 @@ public class MembersBlogFragment extends Fragment {
     }
 
     private void checkIfEmpty(){
-        binding.getViewModel().setEmptyTextVisible(dataStash.membersBlogList.isEmpty());
-        binding.getViewModel().setText("You havent created any blog. Create your first blog.");
+        if(dataStash.membersBlogList.size() == 0){
+            recyclerView.setVisibility(View.INVISIBLE);
+            emptyText.setVisibility(View.VISIBLE);
+            emptyText.setText("You havent created any blog. Create your first blog.");
+        } else {
+            recyclerView.setVisibility(View.VISIBLE);
+            emptyText.setVisibility(View.INVISIBLE);
+        }
     }
 
     @Override

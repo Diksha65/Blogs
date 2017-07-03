@@ -9,16 +9,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-
 /**
  * A simple {@link Fragment} subclass.
  */
 public class PublicBlogFragment extends Fragment {
 
     private RecyclerView recyclerView;
-    private DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Blogs");
 
     public PublicBlogFragment() {
         // Required empty public constructor
