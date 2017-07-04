@@ -12,6 +12,7 @@ public class Blog {
     String bloggerName;
     String approved;
     String key;
+    String bloggerId;
 
     public Blog(){
 
@@ -31,6 +32,14 @@ public class Blog {
         this.description = description;
         this.bloggerName = bloggerName;
         this.approved = approved;
+    }
+
+    public String getBloggerId() {
+        return bloggerId;
+    }
+
+    public void setBloggerId(String bloggerId) {
+        this.bloggerId = bloggerId;
     }
 
     public String getTitle() {

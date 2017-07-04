@@ -1,7 +1,9 @@
 package com.example.diksha.blogs;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -40,7 +42,7 @@ public class MembersBlogFragment extends Fragment {
         view = inflater.inflate(R.layout.fragment_recyclerview, container, false);
 
         emptyText = (TextView)view.findViewById(R.id.emptyView);
-        emptyText.setText("You havent created any blog. Create your first blog.");
+        emptyText.setText("No blogs created");
 
         recyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
@@ -83,7 +85,7 @@ public class MembersBlogFragment extends Fragment {
         });
     }
 
-    public static class BlogsHolder extends RecyclerView.ViewHolder{
+    public static class BlogsHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         SimpleDraweeView imageView;
         TextView title;
         TextView blogger;
@@ -95,8 +97,19 @@ public class MembersBlogFragment extends Fragment {
             title = (TextView)itemView.findViewById(R.id.blog_title);
             blogger = (TextView)itemView.findViewById(R.id.blog_name);
             approval = (Button)itemView.findViewById(R.id.blog_approve);
+            itemView.setOnClickListener(this);
         }
 
+        @Override
+        public void onClick(View v) {
+            Fragment fragment = DetailFragment.newInstance();
+            Context context = v.getContext();
+            if(context instanceof FragmentActivity) {
+                FragmentActivity fragmentActivity = (FragmentActivity)context;
+                FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
+                FragmentUtils.attachFragment(fragment, R.id.fragment_containcer, fragmentManager);
+            }
+        }
     }
 
     @Override
@@ -210,13 +223,13 @@ public class MembersBlogFragment extends Fragment {
         return index;
     }
 
-    private class BlogsHolder extends RecyclerView.ViewHolder{
+    private class BlogsViewHolder extends RecyclerView.ViewHolder{
         SimpleDraweeView imageView;
         TextView title;
         TextView blogger;
         Button approval;
 
-        public BlogsHolder(View itemView){
+        public BlogsViewHolder(View itemView){
             super(itemView);
             imageView = (SimpleDraweeView) itemView.findViewById(R.id.blog_image);
             title = (TextView)itemView.findViewById(R.id.blog_title);
@@ -226,7 +239,7 @@ public class MembersBlogFragment extends Fragment {
 
     }
 
-    public class BlogsAdapter extends RecyclerView.Adapter<BlogsHolder>{
+    public class BlogsAdapter extends RecyclerView.Adapter<BlogsViewHolder>{
 
         List<Blog> blogList;
 
@@ -235,13 +248,13 @@ public class MembersBlogFragment extends Fragment {
         }
 
         @Override
-        public BlogsHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        public BlogsViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
             View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.blog_item, viewGroup, false);
-            return new BlogsHolder(view);
+            return new BlogsViewHolder(view);
         }
 
         @Override
-        public void onBindViewHolder(BlogsHolder blogsHolder, int i) {
+        public void onBindViewHolder(BlogsViewHolder blogsHolder, int i) {
             Blog blog = blogList.get(i);
             blogsHolder.blogger.setText(blog.getBloggerName());
             blogsHolder.imageView.setImageURI(blog.getPhotoUrl());

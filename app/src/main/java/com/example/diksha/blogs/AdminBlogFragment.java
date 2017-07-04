@@ -1,8 +1,11 @@
 package com.example.diksha.blogs;
 
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -58,24 +61,17 @@ public class AdminBlogFragment extends Fragment {
         return view;
     }
 
-    /**
-     *  ToDo This adapter will change. This needs to show list of lists. So dont go with it.
-     */
-
     private void createRecyclerViewAdapter(){
         adapter = new FirebaseRecyclerAdapter<Blog, AdminBlogHolder>(
                 Blog.class,
                 R.layout.blog_item,
                 AdminBlogHolder.class,
-                dataStash.database.child("Unapproved Blogs").getRef()) {
+                dataStash.database.child("UnapprovedBlogs").getRef()) {
             @Override
             protected void populateViewHolder(AdminBlogHolder adminBlogHolder, Blog blog, int i) {
                 if(emptyText.getVisibility() == View.VISIBLE)
                     emptyText.setVisibility(View.GONE);
-                adminBlogHolder.blogger.setText(blog.getBloggerName());
-                adminBlogHolder.imageView.setImageURI(blog.getPhotoUrl());
-                adminBlogHolder.title.setText(blog.getTitle());
-                adminBlogHolder.approval.setVisibility(View.GONE);
+                adminBlogHolder.bindView(blog);
             }
         };
         recyclerView.setAdapter(adapter);
@@ -87,13 +83,58 @@ public class AdminBlogFragment extends Fragment {
         TextView blogger;
         Button approval;
 
-        public AdminBlogHolder(View itemView){
+        public AdminBlogHolder(final View itemView){
             super(itemView);
             imageView = (SimpleDraweeView) itemView.findViewById(R.id.blog_image);
             title = (TextView)itemView.findViewById(R.id.blog_title);
             blogger = (TextView)itemView.findViewById(R.id.blog_name);
             approval = (Button)itemView.findViewById(R.id.blog_approve);
         }
+
+        private void bindView(final Blog blog){
+            blogger.setText(blog.getBloggerName());
+            imageView.setImageURI(blog.getPhotoUrl());
+            title.setText(blog.getTitle());
+            approval.setText(blog.getApproved().equals("true") ? "Approved" : "Not Approved");
+            approval.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    createConfirmationAlertDialog(itemView, blog);
+                }
+            });
+        }
+    }
+
+    private static void createConfirmationAlertDialog(final View itemView, final Blog blog){
+        AlertDialog alertDialog = new AlertDialog.Builder(itemView.getContext())
+                .setTitle("Approval Confirmation")
+                .setMessage("Are you sure to approve this blog?")
+                .setIcon(R.drawable.ic_approve)
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        notifyUser(itemView.getRootView(), "Cancelled Approval");
+                    }
+                })
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        updateDatabase(blog);
+                    }
+                })
+                .create();
+        alertDialog.show();
+    }
+
+    private static void updateDatabase(Blog blog){
+        blog.setApproved("true");
+        dataStash.database.child("UnapprovedBlogs").child(blog.getKey()).removeValue();
+        dataStash.database.child("VisibleToAll").child(blog.getKey()).setValue(blog);
+        dataStash.database.child(blog.getBloggerId()).child(blog.getKey()).setValue(blog);
+    }
+
+    private static void notifyUser(View view, String message){
+        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
     }
 
     @Override

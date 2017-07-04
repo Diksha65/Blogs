@@ -7,6 +7,15 @@ package com.example.diksha.blogs;
 public class DataStashSchema {
 
     /**
+     *  /BlogObject -
+     *          * title of blog
+     *          * description of blog
+     *          * name of the blogger
+     *          * unique id of the blogger
+     *          * photoUrl of the image
+     *          * approval
+     *          * unique id of the blog
+     *
      *  //
      *      Admin/
      *         email - Id
@@ -19,8 +28,8 @@ public class DataStashSchema {
      *                  Id1 - BlogObject
      *                  Id2 - BlogObject
      *         Id of Member 1/
-     *                  Id1 - BlogObject
-     *                  Id2 - BlogObject
+     *                  Id3 - BlogObject
+     *                  Id4 - BlogObject
      *         Id of Member 2/
      *                   .
      *                   .
@@ -30,12 +39,10 @@ public class DataStashSchema {
      *                   .
      *                   .
      *         UnApprovedBlogs/         ->(VisibleToAdmins)
-     *                 Id of Member1/
-     *                      ID1 - BlogObject
-     *                      ID2 - BlogObject
-     *                 Id of Member2/
-     *                      ID1 - BO
-     *                      ID2 - BO
+     *                  ID1 - BlogObject
+     *                  ID2 - BlogObject
+     *                  ID3 - BO
+     *                  ID4 - BO
      *                    .
      *                    .
      *                    .
