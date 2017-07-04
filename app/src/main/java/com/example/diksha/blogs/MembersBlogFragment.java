@@ -90,6 +90,7 @@ public class MembersBlogFragment extends Fragment {
         TextView title;
         TextView blogger;
         Button approval;
+        Blog blog;
 
         public BlogsHolder(View itemView){
             super(itemView);
