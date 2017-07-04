@@ -8,11 +8,11 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.content.FileProvider;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,12 +32,10 @@ import java.util.Date;
  */
 public class CreateBlogFragment extends PermissionFragment {
 
-    protected static final int REQUEST_PERMISSIONS     = 0;
     private static final int PICK_IMAGE_REQUEST      = 1;
     private static final int CLICK_IMAGE_REQUEST     = 2;
 
-    private static final int STORAGE_REQUEST_CODE    = 3;
-    private static final int CAMERA_REQUEST_CODE     = 4;
+    private static final int ACTION_BLOG_CAMERA    = 3;
 
     private static final String TAG = "CreateBlogFragment";
     private String name, describe;
@@ -51,7 +49,7 @@ public class CreateBlogFragment extends PermissionFragment {
     private File image;
     private Context context = getActivity();
 
-    public static CreateBlogFragment newInstance(){
+    public static CreateBlogFragment newInstance() {
         return new CreateBlogFragment();
     }
 
@@ -101,10 +99,7 @@ public class CreateBlogFragment extends PermissionFragment {
         view.findViewById(R.id.blog_camera).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(checkPermissions(getActivity())){
-                    onPermissionGranted();
-                } else
-                    requestPermissions(getActivity(), REQUEST_PERMISSIONS);
+                doPermissionedAction(ACTION_BLOG_CAMERA);
             }
         });
 
@@ -144,10 +139,6 @@ public class CreateBlogFragment extends PermissionFragment {
         return view;
     }
 
-    private void notifyUser(View view, String message){
-        Snackbar.make(view, message, Snackbar.LENGTH_SHORT).show();
-    }
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -179,11 +170,21 @@ public class CreateBlogFragment extends PermissionFragment {
         return FileProvider.getUriForFile(context, getActivity().getApplicationContext().getPackageName() + ".provider", image);
     }
 
-    protected void onPermissionGranted(){
+    private void actionBlogCamera(){
         currentImageUri = getImageFileUri();
         Intent intentPicture = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         intentPicture.putExtra(MediaStore.EXTRA_OUTPUT, currentImageUri); // set the image file name
         startActivityForResult(intentPicture, CLICK_IMAGE_REQUEST);
+    }
+
+    protected void onPermissionGranted(final int ACTION_CODE) {
+        switch (ACTION_CODE){
+            case ACTION_BLOG_CAMERA :
+                actionBlogCamera();
+                break;
+            default:
+                Log.e(TAG, "Wrong Action Code");
+        }
     }
 
     private void addToDatabase(Uri uri){

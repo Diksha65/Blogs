@@ -1,8 +1,5 @@
 package com.example.diksha.blogs;
 
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.util.Pair;
 
 import com.google.firebase.database.ChildEventListener;
@@ -42,19 +39,6 @@ public enum DataStash {
         membersBlogList = new ArrayList<>();
         adminBlogList = new ArrayList<>();
     }
-
-
-    /**
-     *      Creating Fragments
-     */
-
-    public void createFragment(Fragment fragment, int containerId, FragmentManager fragmentManager){
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(containerId, fragment)
-                .addToBackStack(null)
-                .commit();
-    }
-
 
     /**
      *      Value Event Listeners
