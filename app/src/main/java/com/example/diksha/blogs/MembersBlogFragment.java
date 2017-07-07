@@ -46,7 +46,11 @@ public class MembersBlogFragment extends Fragment {
 
         recyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
 
         createRecyclerViewAdapter();
         createNewBlog();
@@ -68,6 +72,7 @@ public class MembersBlogFragment extends Fragment {
                 blogsHolder.imageView.setImageURI(blog.getPhotoUrl());
                 blogsHolder.title.setText(blog.getTitle());
                 blogsHolder.approval.setText(blog.getApproved().equals("true") ? "Approved" : "Not Approved");
+                blogsHolder.blog = blog;
             }
         };
         recyclerView.setAdapter(adapter);
@@ -105,6 +110,10 @@ public class MembersBlogFragment extends Fragment {
         public void onClick(View v) {
             Fragment fragment = DetailFragment.newInstance();
             Context context = v.getContext();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("Blog", blog);
+            bundle.putBoolean("Visible", false);
+            fragment.setArguments(bundle);
             if(context instanceof FragmentActivity) {
                 FragmentActivity fragmentActivity = (FragmentActivity)context;
                 FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();

@@ -194,6 +194,7 @@ public class CreateBlogFragment extends PermissionFragment {
         blog.setBloggerId("DikshaId");
         dataStash.database.child("DikshaId").child(key).setValue(blog);
         dataStash.database.child("UnapprovedBlogs").child(key).setValue(blog);
+        dataStash.database.child("EditingLocks").child(key).child("lock").setValue(false);
     }
 
     private void addPhotoToStorage(Uri path){

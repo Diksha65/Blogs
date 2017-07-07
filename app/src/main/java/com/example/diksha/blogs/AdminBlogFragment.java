@@ -1,10 +1,13 @@
 package com.example.diksha.blogs;
 
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -16,6 +19,12 @@ import android.widget.TextView;
 
 import com.facebook.drawee.view.SimpleDraweeView;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.MutableData;
+import com.google.firebase.database.Transaction;
+import com.google.firebase.database.ValueEventListener;
 
 
 /**
@@ -43,11 +52,15 @@ public class AdminBlogFragment extends Fragment {
 
         recyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
+
 
         createRecyclerViewAdapter();
 
-/*
+        /*
         Button button = (Button)view.findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,16 +85,18 @@ public class AdminBlogFragment extends Fragment {
                 if(emptyText.getVisibility() == View.VISIBLE)
                     emptyText.setVisibility(View.GONE);
                 adminBlogHolder.bindView(blog);
+                adminBlogHolder.blog = blog;
             }
         };
         recyclerView.setAdapter(adapter);
     }
 
-    public static class AdminBlogHolder extends RecyclerView.ViewHolder {
+    public static class AdminBlogHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         SimpleDraweeView imageView;
         TextView title;
         TextView blogger;
         Button approval;
+        Blog blog;
 
         public AdminBlogHolder(final View itemView){
             super(itemView);
@@ -89,6 +104,7 @@ public class AdminBlogFragment extends Fragment {
             title = (TextView)itemView.findViewById(R.id.blog_title);
             blogger = (TextView)itemView.findViewById(R.id.blog_name);
             approval = (Button)itemView.findViewById(R.id.blog_approve);
+            itemView.setOnClickListener(this);
         }
 
         private void bindView(final Blog blog){
@@ -98,11 +114,67 @@ public class AdminBlogFragment extends Fragment {
             approval.setText(blog.getApproved().equals("true") ? "Approved" : "Not Approved");
             approval.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View v) {
-                    createConfirmationAlertDialog(itemView, blog);
+                public void onClick(final View v) {
+                    dataStash.database.child("EditingLocks")
+                            .child(blog.getKey())
+                            .addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    boolean value = (boolean)dataSnapshot.child("lock").getValue();
+                                    if(value){
+                                        notifyUser(v, dataSnapshot.child("blockerName")
+                                                .getValue().toString() + " is using the blog. Wait.");
+                                    } else {
+                                        //if lock is false then set lock to true and do the editing.
+                                        editBlog(dataStash.database.child("EditingLocks")
+                                                .child(blog.getKey()), blog, itemView);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
                 }
             });
         }
+
+        @Override
+        public void onClick(View v) {
+            Fragment fragment = DetailFragment.newInstance();
+            Context context = v.getContext();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("Blog", blog);
+            bundle.putBoolean("Visible", false);
+            if(context instanceof FragmentActivity) {
+                FragmentActivity fragmentActivity = (FragmentActivity)context;
+                FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
+                FragmentUtils.attachFragment(fragment, R.id.fragment_containcer, fragmentManager);
+            }
+        }
+    }
+
+    private static void editBlog(DatabaseReference ref, final Blog blog, final View view){
+        ref.runTransaction(new Transaction.Handler() {
+            @Override
+            public Transaction.Result doTransaction(MutableData mutableData) {
+                boolean value = (boolean)mutableData.child("lock").getValue();
+                if(value)
+                    return Transaction.abort();
+                value = true;
+                mutableData.child("lock").setValue(value);
+                mutableData.child("blockerName").setValue(blog.getBloggerName());
+                return Transaction.success(mutableData);
+            }
+
+            @Override
+            public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
+                if(b) {
+                    createConfirmationAlertDialog(view, blog);
+                }
+            }
+        });
     }
 
     private static void createConfirmationAlertDialog(final View itemView, final Blog blog){
@@ -114,6 +186,7 @@ public class AdminBlogFragment extends Fragment {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         notifyUser(itemView.getRootView(), "Cancelled Approval");
+                        dataStash.database.child("EditingLocks").child(blog.getKey()).child("lock").setValue(false);
                     }
                 })
                 .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
@@ -131,6 +204,7 @@ public class AdminBlogFragment extends Fragment {
         dataStash.database.child("UnapprovedBlogs").child(blog.getKey()).removeValue();
         dataStash.database.child("VisibleToAll").child(blog.getKey()).setValue(blog);
         dataStash.database.child(blog.getBloggerId()).child(blog.getKey()).setValue(blog);
+        dataStash.database.child("EditingLocks").child(blog.getKey()).child("lock").setValue(false);
     }
 
     private static void notifyUser(View view, String message){

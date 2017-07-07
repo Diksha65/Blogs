@@ -41,11 +41,19 @@ public class DataStashSchema {
      *         UnApprovedBlogs/         ->(VisibleToAdmins)
      *                  ID1 - BlogObject
      *                  ID2 - BlogObject
-     *                  ID3 - BO
-     *                  ID4 - BO
      *                    .
      *                    .
-     *                    .
+     *         EditingLocks/
+     *                  BlogObjectId1/
+     *                          lock - T/F
+     *                          blockerId - id Of Person Changing the blog
+     *                  BlogObjectId2/
+     *                          lock - T/F
+     *                          blockerId - id Of Person Changing the blog
+     *
+     *                     .
+     *                     .
+     *                     .
      *
      */
 }

@@ -1,10 +1,12 @@
 package com.example.diksha.blogs;
 
+import java.io.Serializable;
+
 /**
  * Created by diksha on 27/6/17.
  */
 
-public class Blog {
+public class Blog implements Serializable{
 
     String title;
     String photoUrl;

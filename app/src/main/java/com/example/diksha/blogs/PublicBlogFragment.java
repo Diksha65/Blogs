@@ -1,8 +1,11 @@
 package com.example.diksha.blogs;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -40,7 +43,10 @@ public class PublicBlogFragment extends Fragment {
 
         recyclerView = (RecyclerView)view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
-        recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getActivity());
+        linearLayoutManager.setReverseLayout(true);
+        linearLayoutManager.setStackFromEnd(true);
+        recyclerView.setLayoutManager(linearLayoutManager);
 
         createRecyclerViewAdapter();
 
@@ -61,16 +67,18 @@ public class PublicBlogFragment extends Fragment {
                 publicBlogHolder.imageView.setImageURI(blog.getPhotoUrl());
                 publicBlogHolder.title.setText(blog.getTitle());
                 publicBlogHolder.approval.setVisibility(View.GONE);
+                publicBlogHolder.blog = blog;
             }
         };
         recyclerView.setAdapter(adapter);
     }
 
-    public static class PublicBlogHolder extends RecyclerView.ViewHolder {
+    public static class PublicBlogHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
         SimpleDraweeView imageView;
         TextView title;
         TextView blogger;
         Button approval;
+        Blog blog;
 
         public PublicBlogHolder(View itemView){
             super(itemView);
@@ -78,6 +86,22 @@ public class PublicBlogFragment extends Fragment {
             title = (TextView)itemView.findViewById(R.id.blog_title);
             blogger = (TextView)itemView.findViewById(R.id.blog_name);
             approval = (Button)itemView.findViewById(R.id.blog_approve);
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Fragment fragment = DetailFragment.newInstance();
+            Context context = v.getContext();
+            Bundle bundle = new Bundle();
+            bundle.putSerializable("Blog", blog);
+            bundle.putBoolean("Visible", true);
+            fragment.setArguments(bundle);
+            if(context instanceof FragmentActivity) {
+                FragmentActivity fragmentActivity = (FragmentActivity)context;
+                FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
+                FragmentUtils.attachFragment(fragment, R.id.fragment_containcer, fragmentManager);
+            }
         }
     }
 
