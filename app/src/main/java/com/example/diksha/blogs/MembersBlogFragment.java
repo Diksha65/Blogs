@@ -108,12 +108,8 @@ public class MembersBlogFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Fragment fragment = DetailFragment.newInstance();
+            Fragment fragment = DetailFragment.newInstance(blog, false);
             Context context = v.getContext();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("Blog", blog);
-            bundle.putBoolean("Visible", false);
-            fragment.setArguments(bundle);
             if(context instanceof FragmentActivity) {
                 FragmentActivity fragmentActivity = (FragmentActivity)context;
                 FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();

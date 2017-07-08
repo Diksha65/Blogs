@@ -30,6 +30,7 @@ import com.google.firebase.database.ValueEventListener;
 /**
  * A simple {@link Fragment} subclass.
  */
+
 public class AdminBlogFragment extends Fragment {
 
     private static final String TAG = "AdminBlogFragment";
@@ -59,18 +60,6 @@ public class AdminBlogFragment extends Fragment {
 
 
         createRecyclerViewAdapter();
-
-        /*
-        Button button = (Button)view.findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Fragment fragment = DetailFragment.newInstance();
-                FragmentManager fragmentManager = getFragmentManager();
-                FragmentUtils.attachFragment(fragment, R.id.fragment_containcer, fragmentManager);
-            }
-        });*/
-
         return view;
     }
 
@@ -115,6 +104,7 @@ public class AdminBlogFragment extends Fragment {
             approval.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(final View v) {
+                    notifyUser(v, "Clicked");
                     dataStash.database.child("EditingLocks")
                             .child(blog.getKey())
                             .addListenerForSingleValueEvent(new ValueEventListener() {
@@ -128,6 +118,7 @@ public class AdminBlogFragment extends Fragment {
                                         //if lock is false then set lock to true and do the editing.
                                         editBlog(dataStash.database.child("EditingLocks")
                                                 .child(blog.getKey()), blog, itemView);
+                                        notifyUser(v, "yeah");
                                     }
                                 }
 
@@ -142,11 +133,8 @@ public class AdminBlogFragment extends Fragment {
 
         @Override
         public void onClick(View v) {
-            Fragment fragment = DetailFragment.newInstance();
+            Fragment fragment = DetailFragment.newInstance(blog, false);
             Context context = v.getContext();
-            Bundle bundle = new Bundle();
-            bundle.putSerializable("Blog", blog);
-            bundle.putBoolean("Visible", false);
             if(context instanceof FragmentActivity) {
                 FragmentActivity fragmentActivity = (FragmentActivity)context;
                 FragmentManager fragmentManager = fragmentActivity.getSupportFragmentManager();
@@ -160,17 +148,20 @@ public class AdminBlogFragment extends Fragment {
             @Override
             public Transaction.Result doTransaction(MutableData mutableData) {
                 boolean value = (boolean)mutableData.child("lock").getValue();
+                notifyUser(view, String.valueOf(value));
                 if(value)
                     return Transaction.abort();
                 value = true;
                 mutableData.child("lock").setValue(value);
                 mutableData.child("blockerName").setValue(blog.getBloggerName());
+                notifyUser(view, "success");
                 return Transaction.success(mutableData);
             }
 
             @Override
             public void onComplete(DatabaseError databaseError, boolean b, DataSnapshot dataSnapshot) {
                 if(b) {
+                    notifyUser(view, "complete");
                     createConfirmationAlertDialog(view, blog);
                 }
             }
@@ -204,7 +195,7 @@ public class AdminBlogFragment extends Fragment {
         dataStash.database.child("UnapprovedBlogs").child(blog.getKey()).removeValue();
         dataStash.database.child("VisibleToAll").child(blog.getKey()).setValue(blog);
         dataStash.database.child(blog.getBloggerId()).child(blog.getKey()).setValue(blog);
-        dataStash.database.child("EditingLocks").child(blog.getKey()).child("lock").setValue(false);
+        dataStash.database.child("EditingLocks").child(blog.getKey()).setValue(null);
     }
 
     private static void notifyUser(View view, String message){

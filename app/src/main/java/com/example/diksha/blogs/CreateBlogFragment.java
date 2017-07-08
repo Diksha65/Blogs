@@ -34,7 +34,6 @@ public class CreateBlogFragment extends PermissionFragment {
 
     private static final int PICK_IMAGE_REQUEST      = 1;
     private static final int CLICK_IMAGE_REQUEST     = 2;
-
     private static final int ACTION_BLOG_CAMERA    = 3;
 
     private static final String TAG = "CreateBlogFragment";
@@ -188,10 +187,12 @@ public class CreateBlogFragment extends PermissionFragment {
     }
 
     private void addToDatabase(Uri uri){
-        blog = new Blog(name, uri.toString(), describe, "Diksha", "false");
+        blog = new Blog(name, uri.toString(), describe, "Diksha", "false", 0);
         String key = dataStash.database.child("DikshaId").push().getKey();
         blog.setKey(key);
         blog.setBloggerId("DikshaId");
+        dataStash.membersBlogList.add(blog);
+        dataStash.adminBlogList.add(blog);
         dataStash.database.child("DikshaId").child(key).setValue(blog);
         dataStash.database.child("UnapprovedBlogs").child(key).setValue(blog);
         dataStash.database.child("EditingLocks").child(key).child("lock").setValue(false);

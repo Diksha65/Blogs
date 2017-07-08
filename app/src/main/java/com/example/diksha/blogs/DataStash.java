@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum DataStash {
     DATA_STASH;
 
-    DatabaseReference database;
+    DatabaseReference database, userBase;
     StorageReference storage;
 
     List<Blog> publicBlogList;
@@ -31,6 +31,7 @@ public enum DataStash {
     DataStash(){
         database = FirebaseDatabase.getInstance().getReference("Blogs");
         storage = FirebaseStorage.getInstance().getReference("Photos");
+        userBase = FirebaseDatabase.getInstance().getReference("UserProfile");
 
         childEventListeners = new ConcurrentHashMap<>();
         valueEventListeners = new ConcurrentHashMap<>();

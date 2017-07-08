@@ -23,7 +23,8 @@ public abstract class PermissionFragment extends Fragment {
             Manifest.permission.INTERNET,
             Manifest.permission.CAMERA,
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.SET_WALLPAPER
     };
 
     protected void doPermissionedAction(final int ACTION_CODE){

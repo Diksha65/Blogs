@@ -15,6 +15,7 @@ public class Blog implements Serializable{
     String approved;
     String key;
     String bloggerId;
+    int likes;
 
     public Blog(){
 
@@ -28,12 +29,29 @@ public class Blog implements Serializable{
         this.key = key;
     }
 
-    public Blog(String title, String photoUrl, String description, String bloggerName, String approved) {
+    public Blog(String title, String photoUrl, String description, String bloggerName, String approved, int likes) {
         this.title = title;
         this.photoUrl = photoUrl;
         this.description = description;
         this.bloggerName = bloggerName;
         this.approved = approved;
+        this.likes = likes;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public void setLikes(int likes) {
+        this.likes = likes;
+    }
+
+    public void addLike(){
+        likes += 1;
+    }
+    public void removeLike() {
+        if(likes > 0)
+            likes -= 1;
     }
 
     public String getBloggerId() {

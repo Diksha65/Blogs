@@ -17,6 +17,19 @@ public class DataStashSchema {
      *          * unique id of the blog
      *
      *  //
+     *
+     *
+     *      UserProfile/
+     *          userId1/
+     *              BO1 - true
+     *              BO2 - true
+     *          userId2/
+     *              BO1 - true
+     *              .
+     *              .
+     *              .
+     *
+     *
      *      Admin/
      *         email - Id
      *
@@ -54,6 +67,7 @@ public class DataStashSchema {
      *                     .
      *                     .
      *                     .
+     *
      *
      */
 }

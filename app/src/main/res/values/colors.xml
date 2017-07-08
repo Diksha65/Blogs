@@ -3,6 +3,6 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
-    <color name="notApproved">#b91f3e</color>
-    <color name="approved">#1fb94b</color>
+    <color name="likeBorder">#97c4040a</color>
+    <color name="likeFill">#ec0606</color>
 </resources>

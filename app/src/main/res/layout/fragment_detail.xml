@@ -1,5 +1,4 @@
-<ScrollView
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:tools="http://schemas.android.com/tools"
     tools:context="com.example.diksha.blogs.DetailFragment"
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_height="match_parent"
@@ -7,7 +6,7 @@
 
     <RelativeLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content">
 
         <ImageView
             android:layout_width="match_parent"
@@ -15,6 +14,36 @@
             android:layout_centerHorizontal="true"
             android:src="@drawable/wow"
             android:id="@+id/detail_blog_image"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/detail_blog_image"
+            android:orientation="horizontal"
+            android:id="@+id/blog_separator"
+            android:layout_centerHorizontal="true">
+
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/detail_blog_like"
+                android:src="@drawable/ic_like_border"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:hint="Likes"
+                android:id="@+id/detail_blog_likes"/>
+
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/detail_blog_download"
+                android:paddingLeft="50dp"
+                android:clickable="true"
+                android:src="@drawable/ic_wallpaper"/>
+        </LinearLayout>
 
         <TextView
             android:layout_width="wrap_content"
@@ -27,7 +56,7 @@
             android:layout_marginLeft="10dp"
             android:layout_marginRight="10dp"
             android:layout_marginTop="18dp"
-            android:layout_below="@+id/detail_blog_image"
+            android:layout_below="@+id/blog_separator"
             android:layout_centerHorizontal="true" />
 
         <TextView
@@ -64,33 +93,3 @@
     </RelativeLayout>
 
 </ScrollView>
-
-<!--
-
-<android.support.design.widget.AppBarLayout
-        android:layout_width="match_parent"
-        android:layout_height="50dp">
-
-        <android.support.design.widget.CollapsingToolbarLayout
-            android:id="@+id/collapsing_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|enterAlways"
-            android:fitsSystemWindows="true"
-            app:contentScrim="?attr/colorPrimary"
-            app:expandedTitleMarginStart="48dp"
-            app:expandedTitleMarginEnd="64dp">
-
-            <android.support.v7.widget.Toolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                android:background="?attr/colorPrimary"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                app:layout_scrollFlags="scroll|enterAlways"
-                app:layout_collapseMode="parallax" />
-
-        </android.support.design.widget.CollapsingToolbarLayout>
-    </android.support.design.widget.AppBarLayout>
-
--->
