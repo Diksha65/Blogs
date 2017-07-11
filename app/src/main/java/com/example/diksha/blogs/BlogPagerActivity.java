@@ -11,20 +11,25 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.List;
 
 public class BlogPagerActivity extends AppCompatActivity {
 
     private static final String TAG = "BlogPagerActivity";
     private ViewPager viewPager;
     private static DataStash dataStash = DataStash.DATA_STASH;
-    private static final String EXTRA = "111";
+    private static final String EXTRA = "111", TYPE = "222";
+    private DataStash.type type;
+    private List<Blog> list;
     private FragmentStatePagerAdapter adapter;
-    public static Intent newIntent(Context packageContext, Blog blog){
+    public static Intent newIntent(Context packageContext, Blog blog, DataStash.type viewType){
         Intent intent = new Intent(packageContext, BlogPagerActivity.class);
         intent.putExtra(EXTRA, blog);
+        intent.putExtra(TYPE, viewType);
         return intent;
     }
 
@@ -33,27 +38,33 @@ public class BlogPagerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_blog_pager);
 
-        Log.e(TAG, String.valueOf(dataStash.publicBlogList.size()));
+        if(getSupportActionBar() != null)
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+
         Blog blog = (Blog)getIntent().getSerializableExtra(EXTRA);
+        type = (DataStash.type)getIntent().getSerializableExtra(TYPE);
+
+        setListType();
+        Log.e(TAG, list.toString());
 
         viewPager = (ViewPager)findViewById(R.id.blog_pager);
         FragmentManager fragmentManager = getSupportFragmentManager();
         adapter = new FragmentStatePagerAdapter(fragmentManager) {
             @Override
             public Fragment getItem(int position) {
-                Blog blog = dataStash.publicBlogList.get(position);
-                return DetailFragment.newInstance(blog, true);
+                Blog blog = list.get(position);
+                return DetailFragment.newInstance(blog, type);
             }
 
             @Override
             public int getCount() {
-                return dataStash.publicBlogList.size();
+                return list.size();
             }
         };
 
         viewPager.setAdapter(adapter);
-        for(int i=0;i<dataStash.publicBlogList.size(); ++i){
-            if(dataStash.publicBlogList.get(i).getKey().equals(blog.getKey())){
+        for(int i=0;i<list.size(); ++i){
+            if(list.get(i).getKey().equals(blog.getKey())){
                 viewPager.setCurrentItem(i);
                 break;
             }
@@ -62,36 +73,42 @@ public class BlogPagerActivity extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public boolean onSupportNavigateUp() {
+        finish();
+        return true;
+    }
+
+    private void setListType(){
+        switch (type){
+            case isPublic:
+                list = dataStash.publicBlogList;
+                break;
+            case isAdmin:
+                list = dataStash.adminBlogList;
+                break;
+            case isMember:
+                list = dataStash.membersBlogList;
+                break;
+            default:
+                Log.e(TAG, "typeError");
+        }
+    }
+
     private void addBLogsToList(){
 
-        if(dataStash.attachChildEventListener("LALA",
+        if(dataStash.attachValueEventListener("LALA",
                 dataStash.database.child("VisibleToAll"),
-                new ChildEventListener() {
+                new ValueEventListener() {
                     @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        Blog blog = dataSnapshot.getValue(Blog.class);
-                        if(notAdded(blog)) {
-                            Log.e(TAG, blog.getTitle());
-                            Log.e(TAG, "Changing");
-                            dataStash.publicBlogList.add(blog);
-                            adapter.notifyDataSetChanged();
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        for(DataSnapshot snapshot : dataSnapshot.getChildren()) {
+                            Blog blog = snapshot.getValue(Blog.class);
+                            if (notAdded(blog)) {
+                                dataStash.publicBlogList.add(blog);
+                                adapter.notifyDataSetChanged();
+                            }
                         }
-
-                    }
-
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
                     }
 
                     @Override
@@ -106,8 +123,8 @@ public class BlogPagerActivity extends AppCompatActivity {
     }
 
     private boolean notAdded(Blog blog){
-        for(int i=0;i<dataStash.publicBlogList.size(); ++i)
-            if(dataStash.publicBlogList.get(i).getKey().equals(blog.getKey()))
+        for(int i=0;i<list.size(); ++i)
+            if(list.get(i).getKey().equals(blog.getKey()))
                 return false;
         return true;
     }
@@ -115,6 +132,6 @@ public class BlogPagerActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        dataStash.detachChildEventListener("LALA");
+        dataStash.detachValueEventListener("LALA");
     }
 }

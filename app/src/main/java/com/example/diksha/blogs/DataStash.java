@@ -21,6 +21,10 @@ import java.util.concurrent.ConcurrentHashMap;
 public enum DataStash {
     DATA_STASH;
 
+    public enum type{
+        isPublic, isMember, isAdmin;
+    }
+
     DatabaseReference database, userBase;
     StorageReference storage;
 

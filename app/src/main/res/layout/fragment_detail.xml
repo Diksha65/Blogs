@@ -10,7 +10,7 @@
 
         <ImageView
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:src="@drawable/wow"
             android:id="@+id/detail_blog_image"/>
